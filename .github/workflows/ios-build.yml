@@ -1,0 +1,88 @@
+
+name: Flutter iOS - App Store
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    env:
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+      CERTIFICATE_PRIVATE_KEY: ${{ secrets.CERTIFICATE_PRIVATE_KEY }}
+      BUNDLE_ID: ${{ vars.BUNDLE_ID }}
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar ferramentas de assinatura
+        run: pip install codemagic-cli-tools
+
+      - name: Instalar dependências Flutter
+        run: flutter pub get
+
+      - name: Instalar CocoaPods
+        run: |
+          if [ -f ios/Podfile ]; then
+            cd ios
+            pod install
+          fi
+
+      - name: Preparar chaveiro Apple
+        run: keychain initialize
+
+      - name: Obter certificado e perfil Apple
+        run: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+
+      - name: Instalar certificados
+        run: keychain add-certificates
+
+      - name: Configurar assinatura Xcode
+        run: xcode-project use-profiles
+
+      - name: Gerar IPA assinado
+        run: |
+          flutter build ipa --release \
+            --build-number "$GITHUB_RUN_NUMBER" \
+            --export-options-plist="$HOME/export_options.plist"
+
+      - name: Salvar IPA como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: aplicativo-ios
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enviar para App Store Connect
+        run: |
+          IPA_PATH=$(find build/ios/ipa -name "*.ipa" -print -quit)
+
+          if [ -z "$IPA_PATH" ]; then
+            echo "Arquivo IPA não encontrado."
+            exit 1
+          fi
+
+          app-store-connect publish --path "$IPA_PATH"

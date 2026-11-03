@@ -26,9 +26,9 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Verificar versão do Xcode
-          run: |
-            xcodebuild -version
-            xcodebuild -showsdks
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks
 
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
@@ -68,8 +68,20 @@ jobs:
         run: keychain add-certificates
 
       - name: Configurar assinatura Xcode
-        run: xcode-project use-profiles
-
+        run: xcode-project use-profiles --project ios/Runner.xcodeproj
+        
+      - name: Conferir configuração iOS
+        run: |
+          echo "Bundle ID configurado: $BUNDLE_ID"
+          echo "Bundle ID detectado pelo Xcode:"
+          xcode-project detect-bundle-id
+          echo "Configurações de assinatura:"
+          grep -n "PRODUCT_BUNDLE_IDENTIFIER" ios/Runner.xcodeproj/project.pbxproj
+          echo "Certificados instalados:"
+          security find-identity -v -p codesigning
+          echo "Provisioning Profiles:"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || true
+          
       - name: Gerar IPA assinado
         run: |
           flutter build ipa --release \

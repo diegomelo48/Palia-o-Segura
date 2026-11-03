@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
 
     env:
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -21,6 +21,11 @@ jobs:
     steps:
       - name: Baixar projeto
         uses: actions/checkout@v4
+        
+      - name: Verificar versão do Xcode
+          run: |
+            xcodebuild -version
+            xcodebuild -showsdks
 
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2

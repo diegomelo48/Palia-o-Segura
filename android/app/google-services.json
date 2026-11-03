@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "632613605028",
+    "firebase_url": "https://natasha-ec058-default-rtdb.firebaseio.com",
+    "project_id": "natasha-ec058",
+    "storage_bucket": "natasha-ec058.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632613605028:android:ea53e1457fd2b2df466031",
+        "android_client_info": {
+          "package_name": "aplicacao.gsa.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8UwW24fK-AHws6-L1V2T5lt-m1Oinpt4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632613605028:android:88cc5ff46c0b76ce466031",
+        "android_client_info": {
+          "package_name": "devdiego.gustavo.paliacaosegura"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8UwW24fK-AHws6-L1V2T5lt-m1Oinpt4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

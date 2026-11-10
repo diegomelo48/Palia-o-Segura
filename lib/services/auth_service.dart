@@ -28,6 +28,39 @@ class AuthService {
 
   Future<void> logout() => _auth.signOut();
 
+  /// Exclui a conta do usuário (exigência da Apple, guideline 5.1.1(v)).
+  ///
+  /// Remove, nesta ordem: o registro em "Usuarios", a foto de perfil e,
+  /// por último, a conta do Firebase Auth. O Firebase só permite excluir a
+  /// conta com login recente, então reautenticamos com a senha antes.
+  /// Lança [FirebaseAuthException] (ex.: "invalid-credential") se a senha
+  /// estiver incorreta.
+  Future<void> excluirConta({required String senha}) async {
+    final user = _auth.currentUser;
+    final email = user?.email;
+    if (user == null || email == null) {
+      throw FirebaseAuthException(
+        code: 'no-current-user',
+        message: 'Nenhum usuário autenticado.',
+      );
+    }
+
+    final credencial = EmailAuthProvider.credential(
+      email: email,
+      password: senha,
+    );
+    await user.reauthenticateWithCredential(credencial);
+
+    final uid = user.uid;
+    await _usuariosRef.child(uid).remove();
+    try {
+      await _fotosRef.child('$uid.jpg').delete();
+    } catch (_) {
+      // Usuário sem foto de perfil: nada a remover.
+    }
+    await user.delete();
+  }
+
   /// Cadastra o usuário no Auth, sobe a foto (se houver) e grava o
   /// registro completo no Realtime Database em uma única chamada —
   /// evitando o problema de sobrescrever campos que não fazem parte

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -33,6 +34,84 @@ class _PerfilScreenState extends State<PerfilScreen> {
       _usuario = usuario;
       _carregando = false;
     });
+  }
+
+  Future<void> _sair() async {
+    await AuthService.instance.logout();
+    if (!mounted) return;
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+  }
+
+  /// Fluxo de exclusão de conta exigido pela Apple (guideline 5.1.1(v)).
+  Future<void> _excluirConta() async {
+    final senhaController = TextEditingController();
+
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir conta'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Esta ação é permanente. Seus dados de cadastro e sua foto de '
+              'perfil serão apagados e não poderão ser recuperados.\n\n'
+              'Para confirmar, digite sua senha:',
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            TextField(
+              controller: senhaController,
+              obscureText: true,
+              decoration: const InputDecoration(hintText: 'Senha'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text(
+              'Excluir',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final senha = senhaController.text;
+    senhaController.dispose();
+    if (confirmou != true) return;
+
+    if (senha.isEmpty) {
+      _mostrarMensagem('Digite sua senha para confirmar a exclusão.');
+      return;
+    }
+
+    try {
+      await AuthService.instance.excluirConta(senha: senha);
+      if (!mounted) return;
+      _mostrarMensagem('Conta excluída com sucesso.');
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+    } on FirebaseAuthException catch (e) {
+      final senhaIncorreta = e.code == 'wrong-password' ||
+          e.code == 'invalid-credential' ||
+          e.code == 'invalid-login-credentials';
+      _mostrarMensagem(senhaIncorreta
+          ? 'Senha incorreta.'
+          : 'Não foi possível excluir a conta. Tente novamente.');
+    } catch (_) {
+      _mostrarMensagem('Não foi possível excluir a conta. Tente novamente.');
+    }
+  }
+
+  void _mostrarMensagem(String texto) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texto)));
   }
 
   Future<void> _abrirEdicao() async {
@@ -86,6 +165,19 @@ class _PerfilScreenState extends State<PerfilScreen> {
           OutlinedButton(
             onPressed: _abrirEdicao,
             child: const Text('Editar perfil'),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          OutlinedButton(
+            onPressed: _sair,
+            child: const Text('Sair da conta'),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          TextButton(
+            onPressed: _excluirConta,
+            child: const Text(
+              'Excluir conta',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

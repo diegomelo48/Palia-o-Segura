@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'firebase_options.dart';
 import 'screens/auth/cadastro_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/recuperar_senha_screen.dart';
@@ -31,14 +32,56 @@ import 'screens/sintomas/controle_sintomas_screen.dart';
 import 'screens/sintomas/outros_controles_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Gerado pelo `flutterfire configure` — substitui o google-services.json
-  // do projeto Android original.
-  await Firebase.initializeApp();
+  try {
+    // Usa as credenciais geradas pelo flutterfire configure / ajustadas à mão
+    // em lib/firebase_options.dart (Android e iOS).
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (erro) {
+    // Em vez de tela branca, mostra o motivo da falha de inicialização.
+    runApp(_ErroInicializacaoApp(mensagem: erro.toString()));
+    return;
+  }
 
   runApp(const PaliacaoSeguraApp());
+}
+
+/// Tela de diagnóstico exibida apenas se o Firebase não inicializar.
+class _ErroInicializacaoApp extends StatelessWidget {
+  final String mensagem;
+  const _ErroInicializacaoApp({required this.mensagem});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Não foi possível iniciar o aplicativo',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  SelectableText(mensagem),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class PaliacaoSeguraApp extends StatelessWidget {

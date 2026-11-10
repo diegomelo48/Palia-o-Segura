@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class PrivacidadeScreen extends StatelessWidget {
+/// Equivalente ao PrivacidadeFragment nativo: exibe a política de
+/// privacidade em HTML guardada nos assets do app.
+///
+/// Coloque o MESMO arquivo do app nativo em:
+///   assets/politica_privacidade.html
+/// (já registrado no pubspec.yaml).
+class PrivacidadeScreen extends StatefulWidget {
   const PrivacidadeScreen({super.key});
 
   @override
+  State<PrivacidadeScreen> createState() => _PrivacidadeScreenState();
+}
+
+class _PrivacidadeScreenState extends State<PrivacidadeScreen> {
+  late final WebViewController _controller = WebViewController()
+    ..loadFlutterAsset('assets/pdfs/politica_privacidade.html');
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Política de Privacidade'),
-      ),
-      body: SfPdfViewer.asset(
-        'assets/pdfs/politica_privacidade.pdf',
-      ),
-    );
+    return WebViewWidget(controller: _controller);
   }
 }

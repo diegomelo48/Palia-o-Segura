@@ -22,13 +22,12 @@ class ControleFadigaScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           const AccordionSection(
-            titulo: 'Avaliação e Escalas',
+            titulo: 'Avaliação Inicial',
             conteudo: Text(
               '• Avaliar funcionalidade global.\n'
               '• A fadiga frequentemente ocorre em cluster com anorexia e '
               'boca seca.\n'
-              '• Avaliar perda de peso e impacto na autonomia.\n'
-              '• Utilizar ASG-PPP para avaliação nutricional precoce.',
+              '• Avaliar perda de peso e impacto na autonomia.\n',
               style: TextStyle(height: 1.5),
             ),
           ),

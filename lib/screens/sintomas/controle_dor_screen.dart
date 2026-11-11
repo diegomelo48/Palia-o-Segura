@@ -106,11 +106,9 @@ class _ControleDorScreenState extends State<ControleDorScreen> {
           const SizedBox(height: AppSpacing.md),
 
           const AccordionSection(
-            titulo: 'Avaliação e Escalas',
+            titulo: 'Avaliação',
             conteudo: Text(
               '• Anamnese completa (local, irradiação, natureza).\n'
-              '• Escala de Edmonton (ESAS) para intensidade.\n'
-              '• PPS para funcionalidade.\n'
               '• Identificar tipo da dor: visceral, óssea ou neuropática.',
               style: TextStyle(height: 1.5),
             ),
@@ -183,6 +181,7 @@ class _ControleDorScreenState extends State<ControleDorScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Column(

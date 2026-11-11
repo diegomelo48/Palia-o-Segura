@@ -2,7 +2,7 @@
 name: paliacao_segura
 description: Cuidados Paliativos Seguros - app de apoio clínico em cuidados paliativos.
 publish_to: 'none'
-version: 1.0.0+2
+version: 1.1.0+3
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
